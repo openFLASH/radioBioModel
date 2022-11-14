@@ -1,2 +1,2 @@
 # radioBioModel
-A physicochemical model for FLASH reiochemistry
+A physicochemical model for FLASH radiochemistry
