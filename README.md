@@ -1,4 +1,5 @@
-The RadioBioModel software library is a set of tools for research work in proton therapy, more specifically for the research work in FLASH proton therapy using a ridge filter to create a spread out Bragg peak.  
+The RadioBioModel software library is a set of tools for research work in proton therapy, more specifically for the research work in FLASH proton therapy. This is an implementation of the radiochemical model described in the article ""
+[A physicochemical model of reaction kinetics supports peroxyl radical recombination as the main determinant of the FLASH effect](https://doi.org/10.1016/j.radonc.2020.06.001) ".  
 
 Please read these terms and conditions carefully before using this software LIBRARY.
 
