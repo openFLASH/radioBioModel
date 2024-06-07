@@ -466,7 +466,7 @@ Jac(d_CtOHr,:)  = -d_R4 -d_R5 +d_R7 +d_R8 +d_R11 -d_R13 +d_R15 -2.*d_R18 -d_R20 
 
 % Radical H^.
 dydt(d_Hr) = R1   -R3   +R6   -R11   -2.*R12   -R13   -R14   -R15   -R16   -R17   +R20   -RdH   + param.krHr .* param.R(t,param);
-Jac(d_Hr,:)  = d_R1 -d_R3 +d_R6 -d_R11 -2.*d_R12 -d_R13 -d_R14 -d_R15 -d_R16 -d_R17 +d_R20 -d_RdH + param.krHr .* param.R(t,param);
+Jac(d_Hr,:)  = d_R1 -d_R3 +d_R6 -d_R11 -2.*d_R12 -d_R13 -d_R14 -d_R15 -d_R16 -d_R17 +d_R20 -d_RdH ;
 
 % H2
 dydt(d_H2) = R2   +R3   +R11   +R12   -R20  + param.krH2 .* param.R(t,param);

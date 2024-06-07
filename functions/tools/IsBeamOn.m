@@ -26,5 +26,5 @@
 % Authors : R. Labarbe (open.reggui@gmail.com)
 
 function beam = IsBeamOn(t, param)
-  beam = (mod(t, param.T) <= param.t_on).*(t <= param.td);
+  beam = (mod(t, param.T) <= param.t_on) .* (t <= param.td);
 end
