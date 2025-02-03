@@ -27,7 +27,6 @@
 
 function [y0 , t0] = getY0(param , radioModel)
 
-  %[~ , labels]= radiolysisKinetics2P_a();
   [~ , labels]= radioModel();
 
   G = zeros(numel(labels) , 1); % mol/l/Gy

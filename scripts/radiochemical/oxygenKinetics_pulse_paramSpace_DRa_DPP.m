@@ -45,15 +45,6 @@ data.NbPulses = NbPulses;
 data.O2 = O2;
 
 
-%Rate constants
-%------------------
-[kbr2 , kLOOself , kb3 , kb8 , kbr] = getRateConstants();
-param = getDefaultParam();
-kName = {  'kbr2' , 'kb3' , 'kLOOself' , 'kb8' , 'kbr'};
-kValue = [kbr2 , kb3,  kLOOself , kb8, kbr];
-param = set_k_in_param(param,kValue,kName); %Update the value of the rate constant
-
-
 %on/off biological reactions
 indexLegend = 1;
 legendSTR = {};
@@ -61,66 +52,23 @@ legendSTR2 = {};
 
 %Loop
 for  NbPulses_i = 1:length(NbPulses)
+
       for doseRateIndex = 1:length(AvDoseRate)
 
-          param.R0   = AvDoseRate(doseRateIndex); %Average dose rate
-          param.T    = TotalDose./(NbPulses(NbPulses_i) .* AvDoseRate(doseRateIndex));  %Period (s)
-          param.t_on = PulseWidth(NbPulses_i); %s Duration of a single pulse
+          Period    = TotalDose./(NbPulses(NbPulses_i) .* AvDoseRate(doseRateIndex));  %Period (s)
 
-          fprintf('Period : %f \n',param.T)
+          fprintf('Period : %f \n',Period)
 
-          if (param.T > param.t_on)
+
+          if (Period > PulseWidth(NbPulses_i))
             %Make computation only if the period is longer than the pulse duration
 
-                legendSTR{end+1} =  ['<dD/dt> = ' num2str(param.R0,'%2.1g') ' Gy/s -- T = ' num2str(param.T .* 1e3,'%2.1g') ' ms'];
+                [LOOHf(doseRateIndex, NbPulses_i) , AvDR  ] = getLOOHf(TotalDose , Period , PulseWidth(NbPulses_i) , NbPulses(NbPulses_i) , O2);
 
-                fprintf('Computing for average dose rate %1.3g Gy/s .... \n',param.R0);
-                fprintf('Period  : %g s \n',param.T)
-                fprintf('Beam ON : %1.3g s \n',param.t_on)
+                legendSTR{end+1} =  ['<dD/dt> = ' num2str(AvDR,'%2.1g') ' Gy/s -- T = ' num2str(Period .* 1e3,'%2.1g') ' ms'];
 
-                param.td = TotalDose ./ param.R0; % s Beam ON time. Set the beam time to deliver the same total dose for all dose rate
-                fprintf('Computing for dose %g Gy => delivery time %g s \n',TotalDose,param.td);
-                fprintf('Number of pulses : %d \n',ceil(param.td ./ param.T))
-
-                %Initial concentrations
-                %=======================
-                [dydt , labels]= radiolysisKinetics2P_a();
-                Nbconcentrations = length(labels);
-                fprintf('Number of tracked concentrations: %d \n',Nbconcentrations);
-                labels
-
-                [y0 , t0] = getY0(param , @radiolysisKinetics2P_a); %Radical concentration at begining of homogeneous chemical phase
-                y0(2)  = O2; %u-mol/l Oxygen inital concentration
-
-                if (strcmp(func2str(param.R) , 'pulsedBeam'))
-                  fprintf('Pulsed beam -- Pulse width = %g s \n',param.t_on);
-                  opts = odeset('NonNegative',1:length(y0),'InitialStep',param.t_on.*1e-4,'Jacobian',@JacRadiolysisKinetics2P_a);
-                else
-                  fprintf('Not a pulsed beam -- Default ode time step \n')
-                  opts = odeset('NonNegative',1:length(y0),'Jacobian',@JacRadiolysisKinetics2P_a);
-                end
-                Tstart = datetime;
-                fprintf('Computation starts at %s \n',Tstart);
-                [t,y] = pulsedODE(@odefcnComprehensive, t0 , y0,opts,param,param);
-                Tend = datetime;
-                fprintf('Computation ends at %s \n',Tend);
-                fprintf('Duration : %s \n',Tend-Tstart);
-
-                % Store all computation results per O2/totalDose/doseRate
-                store_y{doseRateIndex}{NbPulses_i} = [t,y];
-
-                [~ , Rp] = param.R(0,param);
-                fprintf('Peak dose rate = %2.3g Gy/s \n',Rp);
-
-                %Display graph for all species
-                %=============================
-                %displayGraphSpecies(t, y , doseRateIndex , legendSTR , kb8_i);
-
-                %Get final LOOH concentration
-                %=====================================
-                LOOHf(doseRateIndex, NbPulses_i) =  y(end,10); %uM
-                fprintf('Average dose rate = %f Gy/s \n',param.R0)
-                fprintf('Dose %g Gy => delivery time %g s \n',TotalDose,param.td);
+                fprintf('Average dose rate = %f Gy/s \n',AvDR)
+                fprintf('Dose %g Gy \n',TotalDose);
                 fprintf('[LOOH]f = %g uM \n',LOOHf(doseRateIndex, NbPulses_i))
                 fprintf('DONE \n')
           else
@@ -148,7 +96,7 @@ end %for NbPulses_i
 
 
 DPP = TotalDose ./ NbPulses;
-figure(1)
+figure(201)
 contour(DPP , AvDoseRate   , LOOHf , '-b', 'ShowText','on' )
 ylabel('DR_a (Gy/s)')
 xlabel('D_{pulse} (Gy)')
@@ -158,7 +106,7 @@ title(['[LOOH]_f'])
 
 AvDoseRate
 idx = min(find(AvDoseRate > 100))
-figure(2)
+figure(202)
 plot(DPP , squeeze(LOOHf(idx , :)),'o-')
 xlabel('D_{pulse} (Gy)')
 ylabel('[LOOH]_f (n-mol/l)')
@@ -168,33 +116,9 @@ grid on
 
 AvDoseRate
 idx = max(find(DPP >= 4))
-figure(3)
+figure(203)
 plot(AvDoseRate , squeeze(LOOHf(: , idx)),'o-')
 xlabel('DR_a (Gy/s)')
 ylabel('[LOOH]_f (n-mol/l)')
 title(['[LOOH]_f at DPP = ' num2str(DPP(idx),'%3.0f') ' Gy'])
 grid on
-
-%==================================
-% system of Ordinary differential Equation
-% Kinetics of oxygen depletion by aqueous electrons
-%==================================
-
-function dydt = odefcnComprehensive(t,y,param,TissueParam)
-  dydt = radiolysisKinetics2P_a(t,y,param,TissueParam);
-end
-
-
-%----------------------------------
-% Define the default value for the paraemeters
-%----------------------------------
-function param = getDefaultParam()
-  param = paramRadiolytic();
-  fprintf('conversion factor kr-ge = %g \n',ge2kr(1));
-  param.pH = 7; %pH of the extra vascular tissue. NB: assume buffered solution [H+] and [OH-] are constant
-
-  param.R = @pulsedBeam;
-  %param.R = @constantBeam;
-
-
-end

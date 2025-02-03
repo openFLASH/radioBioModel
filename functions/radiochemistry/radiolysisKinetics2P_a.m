@@ -2,7 +2,7 @@
 % Reaction rate for the kinetics of the water radiolysis reactions at time |t|.
 % This function defines a system of ordinary differnetial equation that can be used as input to the ode15s function.
 %
-% The is a TWO-COMPARTMENT KINETIC MODEL OF INTRACELLULAR LIPID PEROXIDATION CHARLES, as defined by Babbs et al [20]
+% The is a TWO-COMPARTMENT KINETIC MODEL OF INTRACELLULAR LIPID PEROXIDATION, as defined by Babbs et al [20]
 %
 %% Syntax
 % |dydt = radiolysisKinetics(t,C,param,TissueParam)|
@@ -431,12 +431,10 @@ kb8           =  keq(P(d_LOOr) , P(d_LOOr) ) .* get_k(param,'kb8',0.0408);
 Rb8           = kb8 .* LOOr;
 d_Rb8(d_LOOr) = kb8 ;
 
-
 %L* + L* -> L-L
 kbr2 = keq(P(d_Lr) , P(d_Lr) ) .* get_k(param,'kbr2',5e7);
 Rbr2         = kbr2 .* Lr .* Lr; % R^. + R^. --> R-R   1e5 < k < 1e9 M^-1s^-1 REference: Favuadon, personal communication
 d_Rbr2(d_Lr) = kbr2 .* 2 .* Lr;
-
 
 %LOO* + LOO* -> LOO-L + O2
 kROOself      = keq(P(d_LOOr) , P(d_LOOr) ) .* get_k(param,'kROOself',1e4);

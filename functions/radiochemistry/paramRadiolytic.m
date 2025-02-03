@@ -39,7 +39,7 @@
 % [7] Kawade, Vitthal Ajinath (n.d.). Synthesis characterization and pulse radiolysis study of mixed ligand cobalt complexes of pyridine and polypyridyl derivatives. 2010. University of Pune. http://hdl.handle.net/10603/2689
 % [13] Neta, P., Robert E. Huie, & Ross, A. B. (1990). Rate Constants for Reactions of Peroxyl Radicals in Fluid Solutions. J. Phys. Chern. Ref. Data, 19, 413–513. https://doi.org/10.1063/1.555854
 % [14] Frongillo, Y., Goulet, T., Fraser, M.-J., Cobut, V., Patau, J. P., & Jay-Gerin, J.-P. (1998). MONTE CARLO SIMULATION OF FAST ELECTRON AND PROTON TRACKS IN LIQUID WATER—II. NONHOMOGENEOUS CHEMISTRY. Radiation Physics and Chemistry, 51(3), 245–254. https://doi.org/10.1016/S0969-806X(97)00097-2
-% [15] 12.	Buxton GV.  An overview of the radiation chemistry of liquids. In: Radiation chemistry, from basics to applications in material and life sciences. Spotheim-Maurizot M, Mostafavi M, Douki T, Belloni J, editors. EDP Sciences, Les Ulis, 2008. pp. 3-16.
+% [15] Buxton GV.  An overview of the radiation chemistry of liquids. In: Radiation chemistry, from basics to applications in material and life sciences. Spotheim-Maurizot M, Mostafavi M, Douki T, Belloni J, editors. EDP Sciences, Les Ulis, 2008. pp. 3-16.
 %
 %% Contributors
 % Authors : R. Labarbe (open.reggui@gmail.com)

@@ -2,11 +2,11 @@
 % Display graph for all species
 %
 %% Syntax
-% |displayGraphSpecies(t, y , doseRateIndex , legendSTR3 , colorIndex)|
+% |displayGraphSpecies(t, y , markerIndex , legendSTR3 , colorIndex)|
 %
 %
 %% Description
-% |displayGraphSpecies(t, y , doseRateIndex , legendSTR3 , colorIndex)| Description
+% |displayGraphSpecies(t, y , markerIndex , legendSTR3 , colorIndex)| Description
 %
 %
 %% Input arguments
@@ -20,10 +20,11 @@
 %
 %% Contributors
 
-function displayGraphSpecies(t, y , doseRateIndex , legendSTR3 , colorIndex)
+function displayGraphSpecies(t, y , markerIndex , legendSTR3 , colorIndex , labels)
 
-
-    [~ , labels]= radiolysisKinetics2P_a();
+    if nargin < 6
+      [~ , labels]= radiolysisKinetics2P_a();
+    end
 
     markers = {'-.','-','--',':'};
     colour = {'k','b','g','r','c','m','y'};
@@ -31,8 +32,8 @@ function displayGraphSpecies(t, y , doseRateIndex , legendSTR3 , colorIndex)
     for fig = 1:size(y,2)
 
       figure(fig)
-      %semilogx(t,y(:,fig), markers{doseRateIndex},'MarkerIndices',1:30:length(t),'MarkerSize',5)
-      loglog(t,y(:,fig), [markers{mod(doseRateIndex,length(markers))+1} colour{mod(colorIndex,length(colour))+1}])
+      %semilogx(t,y(:,fig), markers{markerIndex},'MarkerIndices',1:30:length(t),'MarkerSize',5)
+      loglog(t,y(:,fig), [markers{mod(markerIndex,length(markers))+1} colour{mod(colorIndex,length(colour))+1}])
       hold on
       xlabel('Time (s)')
       ylabel('Concentration (\mu mol/l)')

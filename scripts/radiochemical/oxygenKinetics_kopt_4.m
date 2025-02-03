@@ -11,11 +11,11 @@ close all
 fileName = 'D:\programs\openREGGUI\REGGUI_userdata\radiokinetics\x.csv';
 
 options = optimset('Display','iter');
-    %[kbr2     , kb3  ,  kLOOself   , kb8     , kbr]
+    %[kbr2     , kb3  ,  kROOself   , kb8     , kbr]
 x0 = [1    1   1  1  1]; %Initial guess Multiplicative factor of the current rate constant
 
-[kbr2 , kLOOself , kb3 , kb8 , kbr] = getRateConstants();
-Kref = [kbr2       , kb3       ,  kLOOself       , kb8 , kbr];
+[kbr2 , kROOself , kb3 , kb8 , kbr] = getRateConstants();
+Kref = [kbr2       , kb3       ,  kROOself       , kb8 , kbr];
 
 
 A = [];
@@ -26,14 +26,14 @@ nonlcon = [];
 
 
 %NB: contrarily to what is suggested on the MAtlab documentation, the boundary conditions are defined as STRICTLY larger or STRICTLY smaller
-    %[kbr2  , kb3  ,  kLOOself   , kb8     , kbr]
+    %[kbr2  , kb3  ,  kROOself   , kb8     , kbr]
 lb = [1e5   , 1e6  ,  1e4        , 0.03    , 39  ]  ;  %Lower bound
 ub = [1e9   , 3e8  ,  3e7        , 10      , 400 ,] ; %Upper bound
 
 %kbr2: [1] R* recombine via a second order reaction with a rate constant 10^5 < kd2R < 10^9 (mol/l s)^-1 consistent with the rate of lateral diffusion of lipids in biological membranes.
 %kb3: [1] The rate constant approaches diffusion-limit [11,6], ranging from k 10^8 to 10^10 (mol/l s)^-1 in water, depending on the electronic properties of R. However, in the cellular environment, the diffusion rate is lower due to higher viscosity of cytosol: 10^6 to 10^7 (mol/l s)^-1 [8,23]
 %     [2a,3a,5a,6a]
-% kLOOself : [2a,3a,5a,6a]
+% kROOself : [2a,3a,5a,6a]
 %kb8 :  [2a,3a,5a,6a]
 
 %[1] Labarbe, R., Hotoiu, L., Barbier, J. & Favaudon, V. A physicochemical model of reaction kinetics supports peroxyl radical recombination as the main determinant of the FLASH effect. Radiother. Oncol. 153, 303–310 (2020).
@@ -52,23 +52,35 @@ ub = ub ./ Kref
 
 fileID = fopen(fileName,'w');
 [x,fval,exitflag] = fmincon(@GOFcorrelation,x0 ,A,bs,Aeq,beq,lb,ub,nonlcon , options , fileID);
-fclose(fileID);
+
 
 for id = 1:numel(x)
-  fprintf('k = %f \n',x(id))
+  fprintf('x = %f \n',x(id))
 end
+
+[kbr2 , kROOself , kb3 , kb8 , kbr] = getRateConstants();
+fprintf('kbr2      = %f \n',x(1).*kbr2)
+fprintf('kb3       = %f \n',x(2).*kb3)
+fprintf('kROOself  = %f \n',x(3).*kROOself )
+fprintf('kb8       = %f \n',x(4).*kb8)
+fprintf('kbr       = %f \n',x(5).*kbr)
+
+[Rsq , Rsq1 , Rsq2] = GOFcorrelation(x , fileID)
+
+fclose(fileID);
+
 
 %=================================================
 % Goodness of fit function
 % correlation between [LOOH]f and the crypt survival
 %=================================================
-function Rsq = GOFcorrelation(x , fileID)
+function [Rsq , Rsq1 , Rsq2] = GOFcorrelation(x , fileID)
 
       x = abs(x) %Ratye constant are positive
 
-      [kbr2 , kLOOself , kb3 , kb8 , kbr] = getRateConstants();
-              %[   kbr2    , kb3       ,   kLOOself       , kb8        , kbr]
-      kValue = [x(1).*kbr2 , x(2).*kb3 ,  x(3).*kLOOself  , x(4).*kb8 , x(5).*kbr];
+      [kbr2 , kROOself , kb3 , kb8 , kbr] = getRateConstants();
+              %[   kbr2    , kb3       ,   kROOself      , kb8        , kbr]
+      kValue = [x(1).*kbr2 , x(2).*kb3 ,  x(3).*kROOself  , x(4).*kb8 , x(5).*kbr];
 
       % crypt survival for 11.2 Gy
       %-----------------------------
@@ -127,17 +139,21 @@ function Rsq = GOFcorrelation(x , fileID)
 
       %The GOF has a second term that constraint the decrease of [O2] with a g-factor < 0.45 umol/l/Gy
       gO2 = ([O2 , O22] - [O2f , O2f2]) ./ [TotalDose , TotalDose2];   %u-mol/l / Gy G-factor for oxygen consumption
-      Rsq2 = max( (gO2 - 0.45) , 0);  %we want the number to be <0.45 u-mol/l. put a cost when it is larger
-                                     %Weiss H, Epp ER, Heslin JM, Ling CC, Santomasso A. Oxygen depletion in cells irradiated at ultra-high dose-rates and at conventional dose-rates. Int J Radiat Biol 1974;26:17–29.
-      Rsq2 = mean(Rsq2);    %The GOF is the mean error, so it does not depend on the number of data points
-
+      % Rsq2 = max( (gO2 - 0.45) , 0);  %we want the number to be <0.45 u-mol/l. put a cost when it is larger
+      %                                %Weiss H, Epp ER, Heslin JM, Ling CC, Santomasso A. Oxygen depletion in cells irradiated at ultra-high dose-rates and at conventional dose-rates. Int J Radiat Biol 1974;26:17–29.
+      % Rsq2 = mean(Rsq2);    %The GOF is the mean error, so it does not depend on the number of data points
+      Rsq2 =  (gO2 - 0.45).^2; %We want a gO2 ~0.45 u-mol/l/Gy
+      Rsq2 = 10.*sqrt(mean(Rsq2));   %The GOF is the mean error, so it does not depend on the number of data points
+                                    %Take square root and multiply by 10, so that we accept an error of 10% on gO2
       Rsq = Rsq1 + Rsq2;
+
+      fprintf('R = %f :: G(O2) = %f umol/l/Gy \n',Rsq1,mean(gO2))
 
       %Save current X to file
       for i = 1:numel(kValue)
         fprintf(fileID,'%3.5f , ',kValue(i));
       end
-      fprintf(fileID,'R1= %3.5f , R2= %3.5f \n',Rsq1,Rsq2);
+      fprintf(fileID,'R1= %3.5f , R2= %3.5f ,  G(O2) = %3.5f \n',Rsq1,Rsq2,mean(gO2));
 
 
       figure(201)
@@ -150,5 +166,6 @@ function Rsq = GOFcorrelation(x , fileID)
       ylabel('Crypt survival (%)')
       grid on
       drawnow
+
 
 end
