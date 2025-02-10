@@ -77,6 +77,7 @@ param.kROOself = 1e4;
 param.kde = 1.4e8 .* 1; %k*[DNA] ~ k*[RH] Rate constant for reaction of aqueous electron with bioloigcal molecules (s^-1) [3]
 param.kdH = 1e8 ; %TODO Rate constant for reaction of H^. with bioloigcal molecules (s^-1)
 param.kdOH = 1e10 .* 6.5e-3; % Rate constant for reaction of HO^. with thiols
+param.kb11 = 20; %(mol/l/s)^(-1) LH + LOO* -> L* + LOOH
 % [1] k = 1e10 M-1 s-1 for reaction of OH^. with thiols SH
 % [2] GSH concentration 6.5mM
 

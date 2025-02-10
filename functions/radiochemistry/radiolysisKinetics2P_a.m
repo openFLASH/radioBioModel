@@ -74,10 +74,11 @@
 
 function [dydt , labels , Jac]= radiolysisKinetics2P_a(t,C,param,TissueParam)
 
+labels = {};
 
-labels = {'e^-_{aq}','O_2','H_2O_2','OH^.','H^.','H_2','O2^{.-}','L^.','LOO^.' , 'LOOH'};
 if nargin <1
   dydt=0;
+  labels = {'e^-_{aq}','O_2','H_2O_2','OH^.','H^.','H_2','O2^{.-}','L^.','LOO^.' , 'LOOH'};
   return
 end
 
@@ -138,6 +139,7 @@ d_OHm   = NbSpecies + 10;
 % P= 2 Lipid
 % P = 3 both (in eqaul concentration)
 % Table 5 in [20]
+P = ones(1,20);
 P(d_e)     = 1; %Aqueous electron and negative -> in water
 P(d_O2)    = 3; %In both phases, as in [20]
 P(d_H2O2)  = 3; %In both phases, as in [20]
@@ -157,9 +159,8 @@ P(d_OHm)   = 1; %This is charged -> in water
 
 %Reactant concentrations
 %=====================================
-wNegatif = find(C<0);
-C(wNegatif) = 0; %force positive concentrations
-C = C.*1e-6; %convert concentration from u-mol/l into mol/l so that the unit of the constant match the unit of the concentration
+ %force positive concentrations
+C = C .* (C>0) .* 1e-6; %convert concentration from u-mol/l into mol/l so that the unit of the constant match the unit of the concentration
 
 %Use more sensible variable name to make code easier to read
 e       = C(d_e); % aqueous electron
@@ -183,19 +184,32 @@ OHm = power(10,-14+TissueParam.pH); %[OH-] Buffered solution -> constant concent
 % OHr + OH- <=> Orm + H2O (equation 14 in [2], eq 15 in [3]) pKa = 11.9
 % OHr + H2O <=> Orm + H+
 % Ka = [Orm] [Hp] / [OHr]
-[OHr , Orm, dOHr_dCt , dOrm_dCt] = acidPartition(CtOHr , Hp , 11.9);
+%[OHr , Orm, dOHr_dCt , dOrm_dCt] = acidPartition(CtOHr , Hp , 11.9);
+OHr = CtOHr .* param.PF.OHr;
+Orm = CtOHr .* param.PF.Orm;
+dOHr_dCt = param.PF.dOHr_dCt;
+dOrm_dCt = param.PF.dOrm_dCt;
 
 %H2O2 + OHm <=> HO2m + H2O (equation 49 in [2]) pKa = 11.7
 %H2O2 + H2O <=> HO2m + Hp
 % Ka = [HO2m] [Hp] / [H2O2]
-[H2O2 , HO2m, dH2O2_dCt , dHO2m_dCt] = acidPartition(CtH2O2 , Hp , 11.7);
+%[H2O2 , HO2m, dH2O2_dCt , dHO2m_dCt] = acidPartition(CtH2O2 , Hp , 11.7);
+H2O2  = CtH2O2 .* param.PF.H2O2;
+HO2m = CtH2O2 .* param.PF.HO2m;
+dH2O2_dCt  = param.PF.dH2O2_dCt;
+dHO2m_dCt = param.PF.dHO2m_dCt;
 
 %HO2r <=> O2rm + Hp pKa = 4.9 from [1]
 % Ka = [O2rm] [Hp]/ [HO2r]
 % The total concentration : Ct = [O2rm] + [HO2r]
-[HO2r , O2rm, dHO2r_dCt , dO2rm_dCt] = acidPartition(CtH02r , Hp , 4.9);
+%[HO2r , O2rm, dHO2r_dCt , dO2rm_dCt] = acidPartition(CtH02r , Hp , 4.9);
+HO2r  = CtH02r .* param.PF.HO2r;
+O2rm = CtH02r .* param.PF.O2rm;
+dHO2r_dCt  = param.PF.dHO2r_dCt;
+dO2rm_dCt = param.PF.dO2rm_dCt;
 
-LH    = get_k(param,'LH',0.1); %mol/l Assume a constant lipid concentration in cells
+%LH    = get_k(param,'LH',0.1); %mol/l Assume a constant lipid concentration in cells
+LH    = 0.1; %mol/l Assume a constant lipid concentration in cells
 
 %Declare the individual Jacobians for each reaction rate
 %================================
@@ -313,8 +327,8 @@ d_R15(d_Hr)    = keq(P(d_Hr) , P(d_H2O2) ) .* 9e7           .* H2O2;
 d_R15(d_CtH2O2)= keq(P(d_Hr) , P(d_H2O2) ) .* 9e7     .* Hr       .* dH2O2_dCt;
 
 R16         = keq(P(d_Hr) , P(d_O2) ) .* 2.1e10  .* Hr .* O2;
-d_R16(d_Hr) = keq(P(d_Hr) , P(d_O2) ) .* 2.1e10  .* Hr .* O2;
-d_R16(d_O2) = keq(P(d_Hr) , P(d_O2) ) .* 2.1e10  .* Hr .* O2;
+d_R16(d_Hr) = keq(P(d_Hr) , P(d_O2) ) .* 2.1e10        .* O2;
+d_R16(d_O2) = keq(P(d_Hr) , P(d_O2) ) .* 2.1e10  .* Hr ;
 
 R17            = keq(P(d_Hr) , P(d_HO2r) ) .* 1e10    .* Hr .* HO2r;
 d_R17(d_Hr)    = keq(P(d_Hr) , P(d_HO2r) ) .* 1e10          .* HO2r;
@@ -367,8 +381,10 @@ d_R33(d_CtH02r)= keq(P(d_Orm) , P(d_O2rm) ) .* 6e8     .* Orm         .* dO2rm_d
 
 %DISMUATION of superoxyde
 % 2H+ + 2 O2rm -> H2O2 + O2
-kb1  = keq(P(d_O2rm) , P(d_O2rm) ) .* get_k(param,'kb1',2e9);
-kb1p = keq(P(d_O2rm) , P(d_O2rm) ) .* get_k(param,'kb1p',2e5);
+%kb1  = keq(P(d_O2rm) , P(d_O2rm) ) .* get_k(param,'kb1',2e9);
+kb1  = keq(P(d_O2rm) , P(d_O2rm) ) .* 2e9;
+%kb1p = keq(P(d_O2rm) , P(d_O2rm) ) .* get_k(param,'kb1p',2e5);
+kb1p = keq(P(d_O2rm) , P(d_O2rm) ) .* 2e5;
 Rb1            =  kb1 .* O2rm .* O2rm + kb1p .* O2rm .* O2rm; %dismutation of O2rm with superoxyde dismutase [5] 2 O2rm -> O2 + H2O2 2e6 < k 6e9 M-1s-1 [6] and spontaneous dismuation
 d_Rb1(d_CtH02r)= (kb1 .* 2    .* O2rm + kb1p .* 2    .* O2rm) .* dO2rm_dCt;
 
@@ -386,7 +402,8 @@ Rde       = keq(P(d_e) , P(d_LH) ) .* param.kde .* LH .* e; % Reaction of electr
 d_Rde(d_e)= keq(P(d_e) , P(d_LH) ) .* param.kde .* LH;
 
 %LH + OH* -> L* + H2O
-kb2 = keq(P(d_OHr) , P(d_LH) ) .* get_k(param,'kb2',1e9);
+%kb2 = keq(P(d_OHr) , P(d_LH) ) .* get_k(param,'kb2',1e9);
+kb2 = keq(P(d_OHr) , P(d_LH) ) .* 1e9;
 Rb2           = kb2 .* OHr .* LH; %dLH_dt  Reactions leading to carbon centered Radicals Lr [5][7][8] [9]table 3 page 22
 d_Rb2(d_CtOHr)= kb2        .* LH .* dOHr_dCt;
 
@@ -399,7 +416,8 @@ d_RdH(d_Hr)= keq(P(d_Hr) , P(d_LH) ) .* param.kdH .* LH;
 %-----------
 
 %L* + O2 -> LOO*
-kb3 = keq(P(d_Lr) , P(d_O2) ) .* get_k(param,'kb3',5e7);
+%kb3 = keq(P(d_Lr) , P(d_O2) ) .* get_k(param,'kb3',5e7);
+kb3 = keq(P(d_Lr) , P(d_O2) ) .* param.kb3;
 Rb3        = kb3 .* Lr .* O2; %10^5 to 10^7 in [18]. 10^8 to 10^10 M-1s-1 [5][7].
                       %  5e6 < k < 5e7 M^-1s^-1 Micahel 1981,1986
 d_Rb3(d_O2)= kb3 .* Lr;
@@ -411,7 +429,8 @@ d_Rb3(d_Lr)= kb3       .* O2;
 % We use [LH] instead
 %//////////
 %LH + LOO* -> L* + LOOH
-kb11 = keq(P(d_LH) , P(d_LOOr) ) .* get_k(param,'kb11',20); %(mol/l/s)^(-1)
+%kb11 = keq(P(d_LH) , P(d_LOOr) ) .* get_k(param,'kb11',20); %(mol/l/s)^(-1)
+kb11 = keq(P(d_LH) , P(d_LOOr) ) .* param.kb11; %(mol/l/s)^(-1)
 Rb11           = kb11 .* LH .* LOOr; %Chain initiation for unsaturated lipids.
 d_Rb11(d_LOOr) = kb11 .* LH;
 
@@ -419,7 +438,8 @@ d_Rb11(d_LOOr) = kb11 .* LH;
 %TERMINATION
 %------------
 %L*  + XSH -> LH v+ XS*
-kbr =  keq(P(d_Lr) , P(d_Lr) ) .* get_k(param,'kbr',100); %These thiols are in lipids
+%kbr =  keq(P(d_Lr) , P(d_Lr) ) .* get_k(param,'kbr',100); %These thiols are in lipids
+kbr =  keq(P(d_Lr) , P(d_Lr) ) .* param.kbr; %These thiols are in lipids
 Rbr = kbr .* Lr; % This term represents the decay of alkyl radiacl by other routes than oxygen
                 % For example, with thiols: R. + GSH -> LH + RS.
                 % k= 300 Rate constant from Barry D. Michael [18] for untreated
@@ -427,17 +447,20 @@ Rbr = kbr .* Lr; % This term represents the decay of alkyl radiacl by other rout
 d_Rbr(d_Lr) = kbr;
 
 %LOO* + XSH -> LOOH + XS*
-kb8           =  keq(P(d_LOOr) , P(d_LOOr) ) .* get_k(param,'kb8',0.0408);
+%kb8           =  keq(P(d_LOOr) , P(d_LOOr) ) .* get_k(param,'kb8',0.0408);
+kb8           =  keq(P(d_LOOr) , P(d_LOOr) ) .* param.kb8;
 Rb8           = kb8 .* LOOr;
 d_Rb8(d_LOOr) = kb8 ;
 
 %L* + L* -> L-L
-kbr2 = keq(P(d_Lr) , P(d_Lr) ) .* get_k(param,'kbr2',5e7);
+%kbr2 = keq(P(d_Lr) , P(d_Lr) ) .* get_k(param,'kbr2',5e7);
+kbr2 = keq(P(d_Lr) , P(d_Lr) ) .* param.kbr2;
 Rbr2         = kbr2 .* Lr .* Lr; % R^. + R^. --> R-R   1e5 < k < 1e9 M^-1s^-1 REference: Favuadon, personal communication
 d_Rbr2(d_Lr) = kbr2 .* 2 .* Lr;
 
 %LOO* + LOO* -> LOO-L + O2
-kROOself      = keq(P(d_LOOr) , P(d_LOOr) ) .* get_k(param,'kROOself',1e4);
+%kROOself      = keq(P(d_LOOr) , P(d_LOOr) ) .* get_k(param,'kROOself',1e4);
+kROOself      = keq(P(d_LOOr) , P(d_LOOr) ) .* param.kROOself;
 Rb6           = kROOself .* LOOr  .* LOOr; %dLOOr_dt [13] for self reaction self reaction range from $10^5$ to $10^9 (mol/l)^{-1}s^{-1}$
 d_Rb6(d_LOOr) = kROOself .* 2     .* LOOr;
 
@@ -479,9 +502,12 @@ Rb9 = 0; %DISABLE PEROXYDASE REACTION
 % Km = 1.1; % (M.s)^(-1)
 % k3 = 6.62e7; % (mol/l)^-1 . s^-1 [17]
 % enzyme = 0.08e-6; %mol/l Catalase concentration in cell [19]
-Km = get_k(param,'Km',1.1);% (M.s)^(-1)
-kb10= keq(P(d_H2O2) , P(d_H2O2) ) .* get_k(param,'kb10',6.62e7); % (mol/l)^-1 . s^-1 [17]
-enzyme = get_k(param,'enzyme',0.08e-6);%mol/l Catalase concentration in cell [19]
+%Km = get_k(param,'Km',1.1);% (M.s)^(-1)
+Km = 1.1;% (M.s)^(-1)
+%kb10= keq(P(d_H2O2) , P(d_H2O2) ) .* get_k(param,'kb10',6.62e7); % (mol/l)^-1 . s^-1 [17]
+kb10= keq(P(d_H2O2) , P(d_H2O2) ) .* 6.62e7; % (mol/l)^-1 . s^-1 [17]
+%enzyme = get_k(param,'enzyme',0.08e-6);%mol/l Catalase concentration in cell [19]
+enzyme = 0.08e-6;%mol/l Catalase concentration in cell [19]
 %enzyme = 1e-6.*exp(-t.*0.65); %With the de-activation process [17]
 Rb10           =  kb10.* enzyme.*H2O2 ./ (Km + H2O2);
 d_Rb10(d_CtH2O2) =  dH2O2_dCt .* (kb10 .* enzyme.* (Km + H2O2) - kb10 .* enzyme.*H2O2) ./ (Km + H2O2).^2;

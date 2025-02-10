@@ -24,6 +24,6 @@
 
 function Jac = JacRadiolysisKinetics2P_a(t,C,param,TissueParam)
 
-  [dydt , labels , Jac]= radiolysisKinetics2P_a(t,C,param,TissueParam);
+  [~ , ~ , Jac]= radiolysisKinetics2P_a(t,C,param,TissueParam);
 
 end

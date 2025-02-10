@@ -274,8 +274,8 @@ d_R15(d_Hr)    = 9e7           .* H2O2;
 d_R15(d_CtH2O2)= 9e7     .* Hr       .* dH2O2_dCt;
 
 R16 = 2.1e10  .* Hr .* O2;
-d_R16(d_Hr) = 2.1e10  .* Hr .* O2;
-d_R16(d_O2) = 2.1e10  .* Hr .* O2;
+d_R16(d_Hr) = 2.1e10   .* O2;
+d_R16(d_O2) = 2.1e10  .* Hr;
 
 R17            = 1e10    .* Hr .* HO2r;
 d_R17(d_Hr)    = 1e10          .* HO2r;

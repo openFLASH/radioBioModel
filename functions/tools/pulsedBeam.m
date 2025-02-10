@@ -13,6 +13,7 @@ function [pulseDoseRate , Rp] = pulsedBeam(t, param)
     dutyCycle = param.t_on ./ param.T;
     Rp = param.R0 ./ dutyCycle; %Gy/s, convert from average dose rate into peak dose rate
 
-    pulseDoseRate = IsBeamOn(t, param) .* Rp;
+    %pulseDoseRate = IsBeamOn(t, param) .* Rp;
+    pulseDoseRate = (mod(t, param.T) <= param.t_on) .* (t <= param.td) .* Rp;
 
 end

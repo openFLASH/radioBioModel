@@ -39,7 +39,7 @@
 %
 %% Contributors
 
-function [LOOHf , AvDoseRate , PkDoseRate , O2f] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , kValue , verbose)
+function [LOOHf , AvDoseRate , PkDoseRate , O2f] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , kValue , verbose , PF)
 
   if nargin < 7
     verbose = true;
@@ -61,7 +61,8 @@ function [LOOHf , AvDoseRate , PkDoseRate , O2f] = getLOOHf(TotalDose , Period ,
 
   %Manually change the value of some rate constants in the model
   param = getDefaultParam();
-  kName = {  'kbr2' , 'kb3' , 'kROOself' , 'kb8' , 'kbr'};
+  param.PF = PF;
+  kName = {  'kbr2' , 'kb3' , 'kROOself' , 'kb8' , 'kbr' , 'kb11'};
   param = set_k_in_param(param,kValue,kName); %Update the value of the rate constant
 
   %Compute average dose ratez
