@@ -39,7 +39,7 @@
 %
 %% Contributors
 
-function [LOOHf , AvDoseRate , PkDoseRate , O2f] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , kValue , verbose , PF)
+function [LOOHf , AvDoseRate , PkDoseRate , O2f , t , y,labels] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , kValue , verbose)
 
   if nargin < 7
     verbose = true;
@@ -61,7 +61,14 @@ function [LOOHf , AvDoseRate , PkDoseRate , O2f] = getLOOHf(TotalDose , Period ,
 
   %Manually change the value of some rate constants in the model
   param = getDefaultParam();
+
+  %Compute the partition functions
+  Hp  = power(10,-param.pH); %[H+] Buffered solution -> constant concentration
+  [PF.OHr , PF.Orm, PF.dOHr_dCt , PF.dOrm_dCt] = acidPartition(1 , Hp , 11.9);
+  [PF.H2O2 , PF.HO2m, PF.dH2O2_dCt , PF.dHO2m_dCt] = acidPartition(1 , Hp , 11.7);
+  [PF.HO2r , PF.O2rm, PF.dHO2r_dCt , PF.dO2rm_dCt] = acidPartition(1 , Hp , 4.9);
   param.PF = PF;
+
   kName = {  'kbr2' , 'kb3' , 'kROOself' , 'kb8' , 'kbr' , 'kb11'};
   param = set_k_in_param(param,kValue,kName); %Update the value of the rate constant
 

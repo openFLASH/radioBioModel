@@ -51,8 +51,8 @@ ub = ub ./ Kref
 
 
 fileID = fopen(fileName,'w');
-[x,fval,exitflag] = fmincon(@GOFcorrelation,x0 ,A,bs,Aeq,beq,lb,ub,nonlcon , options , fileID);
-
+%[x,fval,exitflag] = fmincon(@GOFcorrelation,x0 ,A,bs,Aeq,beq,lb,ub,nonlcon , options , fileID); %TODO !!!!!
+x = ones(1,5);
 
 for id = 1:numel(x)
   fprintf('x = %f \n',x(id))
@@ -160,7 +160,7 @@ function [Rsq , Rsq1 , Rsq2] = GOFcorrelation(x , fileID)
       hold off
       errorbar(LOOHf , Meas , SD , '*k')
       hold on
-      errorbar(LOOHf2 , Meas2 , SD2 , '*r')
+      errorbar(LOOHf2 , Meas2 , SD2 , 'or')
       plot(x(:,1) , Predict , '-r')
       xlabel('[LOOH]_f (\mu M)')
       ylabel('Crypt survival (%)')

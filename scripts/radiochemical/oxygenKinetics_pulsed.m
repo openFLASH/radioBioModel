@@ -18,7 +18,8 @@ PulseWidth = 0.2; %s
 NbPulses  = 1
 O2 = 50; %u-mol/l
 
-[t, y , labels] = getConc(TotalDose , Period , PulseWidth , NbPulses , O2 , [] , true);
+[~ , ~ , ~ , ~ , t , y,labels] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , [] , true);
+%[t, y , labels] = getConc(TotalDose , Period , PulseWidth , NbPulses , O2 , [] , true);
 
 
 figure(100)
@@ -54,7 +55,8 @@ PulseWidth = 90; %s
 NbPulses  = 1
 O2 = 0; %u-mol/l
 
-[t, y , labels] = getConc(TotalDose , Period , PulseWidth , NbPulses , O2 , [] , true);
+%[t, y , labels] = getConc (TotalDose , Period , PulseWidth , NbPulses , O2 , [] , true);
+[~ , ~ , ~ , ~ , t , y,labels] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , [] , true);
 
 figure(102)
 legendSTR = {};
@@ -80,7 +82,8 @@ legendSTR = {};
 
 for pw = 1:numel(PulseWidth)
     for nbp = 1:numel(NbPulses)
-        [t, y , labels] = getConc(TotalDose , Period , PulseWidth(pw) , NbPulses(nbp) , O2 , [] , false);
+        %[t, y , labels] = getConc(TotalDose , Period , PulseWidth(pw) , NbPulses(nbp) , O2 , [] , false);
+        [~ , ~ , ~ , ~ , t , y,labels] = getLOOHf(TotalDose , Period , PulseWidth(pw) , NbPulses(nbp) , O2 , [] , false);
         idx = find(strcmp(labels , 'LOOH'));
         LOOHf(nbp , pw) =  y(end,idx); %uM
         idx = find(strcmp(labels , 'LOO^.'));
