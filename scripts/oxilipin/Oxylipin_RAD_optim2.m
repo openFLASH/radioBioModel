@@ -143,49 +143,49 @@ ylabel('[LOOHf]_f / [LOOHf]_f(conv,20°C)')
 pause
 
 
-%Reducing diffusion rate in lipid membrane
-%-------------------------------------------
-%Ea   kbr2    kb3    Ea   kROOself    Ea    kb11  kbr     kb8
-%   L*+L*   L* + O2   LOO*+LOO*       LOO*+LH     L*+AH   LOO*+ AH
+% %Reducing diffusion rate in lipid membrane
+% %-------------------------------------------
+% %Ea   kbr2    kb3    Ea   kROOself    Ea    kb11  kbr     kb8
+% %   L*+L*   L* + O2   LOO*+LOO*       LOO*+LH     L*+AH   LOO*+ AH
 Mask_K = zeros(1,9);
 KMemb = [2, 5 , 7];
 Mask_K(KMemb) = 1; %Identify the rate constants that would be different in tumor cells
 S_k = 1/2.6
 x_slow = x .* Mask_K .* S_k + x .* ~Mask_K;
-
-[~ , LOOHf_s] = GOFLOOHf(x_slow , TotalDose , Period , PulseWidth , NbPulses , O2 , Tdata2 , data2 , Factor, false);
-
-LOOHf_s =  LOOHf_s ./ LOOHf(1); %Compute the relative oxylipin concentrations
-
-figure(400)
-hold on
-plot(Tdata2(1:numel(T)), LOOHf_s(1:numel(T)),'--b')
-plot(Tdata2(numel(T)+1:numel(Tdata2)), LOOHf_s(numel(T)+1:numel(Tdata2)),'--r')
-legendSTR{end+1} = 'CONV  Model with k/2.6';
-legendSTR{end+1} = 'FLASH Model with k/2.6';
-pause
-
-%Increasing the activation energy in memebrane
-%-------------------------------------------
-%Ea   kbr2    kb3    Ea   kROOself    Ea    kb11  kbr     kb8
-%   L*+L*   L* + O2   LOO*+LOO*       LOO*+LH     L*+AH   LOO*+ AH
+%
+% [~ , LOOHf_s] = GOFLOOHf(x_slow , TotalDose , Period , PulseWidth , NbPulses , O2 , Tdata2 , data2 , Factor, false);
+%
+% LOOHf_s =  LOOHf_s ./ LOOHf(1); %Compute the relative oxylipin concentrations
+%
+% figure(400)
+% hold on
+% plot(Tdata2(1:numel(T)), LOOHf_s(1:numel(T)),'--b')
+% plot(Tdata2(numel(T)+1:numel(Tdata2)), LOOHf_s(numel(T)+1:numel(Tdata2)),'--r')
+% legendSTR{end+1} = 'CONV  Model with k/2.6';
+% legendSTR{end+1} = 'FLASH Model with k/2.6';
+% pause
+%
+% %Increasing the activation energy in memebrane
+% %-------------------------------------------
+% %Ea   kbr2    kb3    Ea   kROOself    Ea    kb11  kbr     kb8
+% %   L*+L*   L* + O2   LOO*+LOO*       LOO*+LH     L*+AH   LOO*+ AH
 Mask_E = zeros(1,9);
 KMemb = [1, 4 , 6];
 Mask_E(KMemb) = 1; %Identify the rate constants that would be different in tumor cells
 S_E = 0.5
 x_slow = x .* Mask_E .* S_E + x .* ~Mask_E;
-
-[~ , LOOHf_s2] = GOFLOOHf(x_slow , TotalDose , Period , PulseWidth , NbPulses , O2 , Tdata2 , data2 , Factor, false);
-
-LOOHf_s2 =  LOOHf_s2 ./ LOOHf(1); %Compute the relative oxylipin concentrations
-
-figure(400)
-hold on
-plot(Tdata2(1:numel(T)), LOOHf_s2(1:numel(T)),'-.b')
-plot(Tdata2(numel(T)+1:numel(Tdata2)), LOOHf_s2(numel(T)+1:numel(Tdata2)),'-.r')
-legendSTR{end+1} = 'CONV  Model with Ea/2';
-legendSTR{end+1} = 'FLASH Model with Ea/2';
-pause
+%
+% [~ , LOOHf_s2] = GOFLOOHf(x_slow , TotalDose , Period , PulseWidth , NbPulses , O2 , Tdata2 , data2 , Factor, false);
+%
+% LOOHf_s2 =  LOOHf_s2 ./ LOOHf(1); %Compute the relative oxylipin concentrations
+%
+% figure(400)
+% hold on
+% plot(Tdata2(1:numel(T)), LOOHf_s2(1:numel(T)),'-.b')
+% plot(Tdata2(numel(T)+1:numel(Tdata2)), LOOHf_s2(numel(T)+1:numel(Tdata2)),'-.r')
+% legendSTR{end+1} = 'CONV  Model with Ea/2';
+% legendSTR{end+1} = 'FLASH Model with Ea/2';
+% pause
 
 %Increasing the activation energy & reducing diffusion in memebrane
 %-------------------------------------------

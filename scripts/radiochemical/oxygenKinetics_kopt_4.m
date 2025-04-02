@@ -161,7 +161,7 @@ function [Rsq , Rsq1 , Rsq2] = GOFcorrelation(x , fileID)
       errorbar(LOOHf , Meas , SD , '*k')
       hold on
       errorbar(LOOHf2 , Meas2 , SD2 , 'or')
-      plot(x(:,1) , Predict , '-r')
+      plot(x(:,1) , Predict , '-g')
       xlabel('[LOOH]_f (\mu M)')
       ylabel('Crypt survival (%)')
       grid on
