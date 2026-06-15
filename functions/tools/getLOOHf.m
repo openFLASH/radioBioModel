@@ -1,6 +1,6 @@
 %% displayGraphSpecies
 % Compute the [LOOH]f for the different specified experimental conditions
-% All input vector have the smae length. Each element of the vectors define one experimental condition.
+% All input vector have the same length. Each element of the vectors define one experimental condition.
 %
 %% Syntax
 % |[LOOHf , AvDoseRate , PkDoseRate ] = getLOOHf(TotalDose , Period , PulseWidth , NbPulses , O2 , kValue)|

@@ -15,7 +15,7 @@
 %
 %% Output arguments
 %
-% |kr| - _SCALAR_ - Concentration yield (mol/l/Gy)
+% |kr| - _SCALAR_ - Concentration yield (mol/l/Gy ; mol/J)
 %
 %
 %% Contributors

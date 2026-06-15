@@ -2,20 +2,22 @@
 % Rate constant for the diffusion of DMPC (1,2-dimyristoyl-sn- glycero-3-phosphocholine)
 % as a function of temperature as measured in [1]
 %
-%     k = k0 .* f(T)
+%     k = k298 .* f(T)
 %
 %% Syntax
-% |k = kD_DMPC(Tin , k0)|
+% |k = kD_DMPC(Tin , k298)|
 %
 %
 %% Description
-% |k = kD_DMPC(Tin , k0)| Description
+% |k = kD_DMPC(Tin , k298)| Description
 %
 %
 %% Input arguments
 % |Tin| - _SCALAR_ - Temperature (°C)
 %
-% |k0| -_SCALAR_- Value of the rate constant at 37°C
+% |k298| -_SCALAR_- Value of the rate constant at 25°C (298K)
+%
+% |Ea| -_SCALAR_- Activation energy (J/mol)
 %
 %% Output arguments
 %
@@ -28,10 +30,9 @@
 %% Contributors
 % Authors : R. LAbarbe (open.reggui@gmail.com)
 
-function k = k_arrhenius(Tin , k0 , Ea)
+function k = k_arrhenius(Tin , k298 , Ea)
 
-  %k = k0 .* expA(Tin , Ea) ./ expA(37 , Ea);
-  k = k0 .* expA(Tin , Ea) ./ expA(25 , Ea);
+  k = k298 .* expA(Tin , Ea) ./ expA(25 , Ea);
 
 end
 

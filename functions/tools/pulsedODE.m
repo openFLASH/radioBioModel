@@ -29,7 +29,9 @@
 %
 %% Output arguments
 %
-% |res| - _STRUCTURE_ -  Description
+% |t| - _SCALAR VECTOR_ -  Time point i
+%
+% |y| -_SCALAR MATRIX_- y(i,j) Concentration (mol/l) of the j-th species at time i
 %
 %
 %% Contributors
